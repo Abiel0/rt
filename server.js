@@ -7,12 +7,16 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Add cors middleware
+// Configure CORS
 app.use(cors({
-    origin: '*',  // Allow all origins
-    methods: ['GET', 'POST'],  // Allow GET and POST methods
-    allowedHeaders: ['Content-Type', 'Authorization']  // Allow these headers
+    origin: true, // Allow any origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow all methods
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'], // Allow more headers
+    credentials: true // Allow cookies
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(express.json());
 
