@@ -183,15 +183,20 @@
                     throw new Error('Failed to generate image');
                 }
 
-                imageBlob = await response.blob();
-                const imageUrl = URL.createObjectURL(imageBlob);
+                const result = await response.json();
+                
+                // Create an image from the base64 data
                 const img = document.createElement('img');
-                img.src = imageUrl;
+                img.src = result.image;
                 img.onload = () => {
                     resultDiv.appendChild(img);
                     downloadBtn.style.display = 'inline-block';
                     loadingDiv.style.display = 'none';
                 };
+
+                // Convert base64 to blob for download functionality
+                const fetchResponse = await fetch(result.image);
+                imageBlob = await fetchResponse.blob();
             } catch (error) {
                 console.error('Error:', error);
                 resultDiv.textContent = 'Failed to generate image. Please try again.';

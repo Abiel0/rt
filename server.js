@@ -1,14 +1,30 @@
 const express = require('express');
 const fetch = require('node-fetch');
-require('dotenv').config();  // Add this line to use dotenv
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Add cors middleware
+app.use(cors({
+    origin: '*',  // Allow all origins
+    methods: ['GET', 'POST'],  // Allow GET and POST methods
+    allowedHeaders: ['Content-Type', 'Authorization']  // Allow these headers
+}));
+
 app.use(express.json());
+
+// Serve static files from the 'public' directory if it exists
 app.use(express.static('public'));
 
-const HF_API_KEY = process.env.HF_API_KEY;  // Use environment variable
+// Serve the index.html file from the root directory
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+const HF_API_KEY = process.env.HF_API_KEY;
 
 if (!HF_API_KEY) {
     console.error('HF_API_KEY is not set. Please set it in your environment or .env file.');
@@ -40,8 +56,12 @@ app.post('/generate-image', async (req, res) => {
         }
 
         const result = await response.buffer();
-        res.set('Content-Type', 'image/png');
-        res.send(result);
+        
+        // Convert buffer to base64
+        const base64Image = result.toString('base64');
+        
+        // Send back the base64 encoded image
+        res.json({ image: `data:image/png;base64,${base64Image}` });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Failed to generate image' });
